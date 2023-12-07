@@ -1,125 +1,159 @@
 import sys
+from enum import IntEnum, unique
+from datetime import date
+
+id = 0
+
+@unique
+class Funcionalidade(IntEnum):
+    COMPRAR = 1
+    CADASTRO = 2
+    RELATORIO = 3
+    CONTROLE = 4
+
+class Produto:
+    def __init__(self, nome, preco, validade, quantidade):
+        self.modificar_id()
+        self.id = id
+
+        self.nome = nome
+        self.preco = preco
+        self.validade = validade
+        self.quantidade = quantidade
+
+    def modificar_id(self):
+        global id
+        id = id + 1
+
 class Estoque:
     def __init__(self):
-        self.catalogo = {"arroz": 10.8, "feijao": 8.5, "macarrão": 5.8, "carne": 25.0}
-        self.carrinho = {}
+        self.carrinho = []
         self.total = 0.0
-        self.funcionalidades = ["Comprar", "Cadastro", "Relatorio", "Controle"]
+        self.produtos = []
 
+        arroz = Produto('Saco de Arroz (1 Kg)', 10.8, date(2023, 12, 10), 10)
+        self.produtos.append(arroz)
 
-    def esolha_funcao(self):
+        feijao = Produto('Saco de Feijao (1 Kg)', 8.5, date(2023, 12, 12), 10)
+        self.produtos.append(feijao)
+
+        macarrao = Produto('Saco de Macarrão (500 g)', 5.8, date(2023, 12, 7), 10)
+        self.produtos.append(macarrao)
+
+        carne = Produto('Peça de maminha (1 Kg)', 25.0, date(2023, 12, 10), 10)
+        self.produtos.append(carne)
+
+    def escolha_funcao(self):
         while True:
-            print("Escolha entre as opções abaixo de funcionalidade: ")
-            for funcionalidades in self.funcionalidades:
-                print(f'{funcionalidades.capitalize()}')
+            print("Escolha entre as opções abaixo de funcionalidades:")
+            for funcionalidade in Funcionalidade:
+                print(f'{funcionalidade.value} - {funcionalidade.name.capitalize()}')
 
-            escolha = input("Digite qual das funcionalidade você deseja. (ou ´sair´ para Cancelar): ")
+            escolha = input("Digite o número correspondente à funcionalidade que você deseja usar ou 'sair' para Cancelar: ")
 
             if escolha.lower() == "sair":
                 break
 
-            if escolha in self.funcionalidades:
-                if escolha.lower() == "comprar":
-                    self.comprar()
-                elif escolha.lower() == "cadastro":
-                    self.cadastro_produto()
+            try:
+                escolha = int(escolha)
+            except ValueError:
+                print("Digite um número válido.")
+                continue
+
+            if escolha == Funcionalidade.COMPRAR.value:
+                self.comprar()
+            elif escolha == Funcionalidade.CADASTRO.value:
+                self.cadastro_produto()
             else:
-                print("Não encontrei tal funcionalidade, ou não implementamos ainda :(")
-                print("Tente Novamente")
-                self.esolha_funcao()
+                print("Funcionalidade não encontrada ou não implementada :(")
 
     def cadastro_produto(self):
+        from datetime import datetime
+
         while True:
-            novo_produto = input("Digite o produto a cadastrar. (ou 'sair' para cancelar): ")
+            novo_produto = input("Digite o nome do produto a cadastrar (ou 'sair' para cancelar): ")
 
             if novo_produto.lower() == "sair":
                 break
 
-            novo_preco = input("Digite o preco deste produto. (ou 'sair' para cancelar): ")
+            novo_preco = input("Digite o preço deste produto: ")
+            try:
+                preco = float(novo_preco)
+            except ValueError:
+                print("Digite um valor válido para o preço.")
+                continue
 
-            if novo_preco.lower() == "sair":
-                break
+            data_validade_str = input("Digite a data de validade no formato (DD/MM/AAAA): ")
+            try:
+                data_validade = datetime.strptime(data_validade_str, "%d/%m/%Y").date()
+            except ValueError:
+                print("Digite uma data válida no formato correto (DD/MM/AAAA).")
+                continue
 
-            # Convertendo o preço para float
-            preco = float(novo_preco)
+            nova_quantidade = input("Digite a quantidade deste produto: ")
+            try:
+                quantidade = int(nova_quantidade)
+            except ValueError:
+                print("Digite uma quantidade válida.")
+                continue
 
-            # Atualizando o catálogo
-            self.catalogo.update({novo_produto: preco})
-            for produto, preco in self.catalogo.items():
-                print(f'{produto.capitalize()} - R${preco}')
+            produto = Produto(novo_produto, preco, data_validade, quantidade)
+            self.produtos.append(produto)
+
+            print(f'Produto {produto.nome} cadastrado com sucesso.')
 
     def comprar(self):
         while True:
             print("Catálogo de produtos:")
-            for produto, preco in self.catalogo.items():
-                print(f'{produto.capitalize()} - R${preco}')
-
-            escolha = input("Digite o nome do produto que deseja comprar (ou `sair` para encerrar): ")
+            print("ID  | Quantidade | Nome do Produto             | Preço      | Validade ")
+            for produto in self.produtos:
+                print(
+                    f"{produto.id:2} | {produto.quantidade:2} | {produto.nome:30} | R${produto.preco:.2f} | {produto.validade.strftime('%d/%m/%Y')}")
+            escolha = input("Digite o id do produto que deseja comprar (ou `sair` para encerrar): ")
 
             if escolha.lower() == "sair":
                 break
 
-            if escolha in self.catalogo:
-                quantidade = int(input("Digite a quantidade desejada: "))
-                if escolha in self.carrinho:
-                    self.carrinho[escolha] += quantidade
+            escolha = int(escolha)
+
+            selecao = None  # Inicializa selecao como None
+
+            for produto in self.produtos:
+                if produto.id == escolha:
+                    selecao = produto
+                    break  # Para o loop após encontrar o produto correspondente
+
+            if selecao is not None:
+                qtd_desejada = int(input("Digite a quantidade desejada: "))
+
+                if qtd_desejada > selecao.quantidade:
+                    qtd_desejada = int(input(f"Há apenas {selecao.quantidade} unidades de {selecao.nome}. Digite novamente a quantidade desejada (ou `sair` para cancelar seleção de produto):"))
                 else:
-                    self.carrinho[escolha] = quantidade
-                print(f"{quantidade} unidades de {escolha.capitalize()} adicionadas ao carrinho. ")
+                    # Atualiza a quantidade no catálogo
+                    selecao.quantidade -= qtd_desejada
+                    self.carrinho.append(selecao)
+                    print(f"{qtd_desejada} unidades de {selecao.nome} adicionadas ao carrinho. ")
+
             else:
                 print("Produto não encontrado no catálogo. Tente novamente. ")
 
         print("\nResumo da compra")
-        for produto, quantidade in self.carrinho.items():
-            preco_unitario = self.catalogo[produto]
-            preco_total = preco_unitario * quantidade
-            print(f"{quantidade} unidades de {produto.capitalize()} - R${preco_total:.2f}")
+        print("ID  | Quantidade | Nome do Produto             | Preço Unitário | Preço Total ")
+        for produto in self.carrinho:
+            preco_total = produto.preco * qtd_desejada
+            print(
+                f"{produto.id:2} | {qtd_desejada:2} | {produto.nome:30} | R${produto.preco:.2f} | R${preco_total:.2f} ")
+
             self.total += preco_total
 
         print(f"Total da Compra: R${self.total}")
-        self.pagar()
-
-    def pagar(self):
-        while True:
-            pagamento = input("Digite o valor recebido pelo Cliente (ou 'cancelar' para cancelar a compra): ")
-
-            if pagamento.lower() == "cancelar":
-                print("Compra cancelada")
-                return
-
-            try:
-                valor_pago = float(pagamento)
-            except ValueError:
-                print("Digite um valor válido.")
-                continue
-
-            troco = valor_pago - self.total
-
-            if troco >= 0:
-                print(f"Troco: R${troco}")
-                break  # Sai do loop se o troco for não negativo
-            else:
-                print(f"Valor insuficiente. Faltam R${-troco}")
-
-        cpf_nota = input("Deseja informar o CPF na nota? (sim/não): ")
-        if cpf_nota.lower() == "sim":
-            cpf = input("Digite o CPF: ")
-            print(f"Nota fiscal: Total da compra - R${self.total} | CPF - {cpf}")
-
-        else:
-            print(f"Nota fiscal: Total da compra - R${self.total}")
-
         escolha2 = input("Você deseja continuar?(sim ou nao)")
 
         if escolha2.lower() == "nao": #escolha de continuação do código
             sys.exit()
         else:
-            self.esolha_funcao()
-
-
-
-
+            self.escolha_funcao()
 
 if __name__ == "__main__":
     estoque = Estoque()
-    estoque.esolha_funcao()
+    estoque.escolha_funcao()
