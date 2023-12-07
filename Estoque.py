@@ -35,25 +35,34 @@ class Estoque:
         self.pagar()
 
     def pagar(self):
-        pagamento = input("Digite o valor recebido pelo Cliente (ou `cancelar` para cancelar a compra)")
-        if pagamento.lower() == "cancelar":
-            print("compra cancelada")
-            return
+        while True:
+            pagamento = input("Digite o valor recebido pelo Cliente (ou 'cancelar' para cancelar a compra): ")
 
-        valor_pago = float(pagamento)
-        troco = valor_pago - self.total
+            if pagamento.lower() == "cancelar":
+                print("Compra cancelada")
+                return
 
-        if troco > 0:
-            print(f"Valor insuficiente. Faltam R${-troco}")
-            self.pagar()
-        else:
-            print(f"Troco: R${troco}")
-            cpf_nota = input("Deseja informar o cpf na nota? (sim/não): ")
-            if cpf_nota.lower() == "sim":
-                cpf = input("Digite o CPF: ")
-                print(f"Nota fiscal: Total da compra - R${self.total} | CPF - {cpf}")
+            try:
+                valor_pago = float(pagamento)
+            except ValueError:
+                print("Digite um valor válido.")
+                continue
+
+            troco = valor_pago - self.total
+
+            if troco >= 0:
+                print(f"Troco: R${troco}")
+                break  # Sai do loop se o troco for não negativo
             else:
-                print(f"Nota fiscal: Total da compra - R${self.total}")
+                print(f"Valor insuficiente. Faltam R${-troco}")
+
+        cpf_nota = input("Deseja informar o CPF na nota? (sim/não): ")
+        if cpf_nota.lower() == "sim":
+            cpf = input("Digite o CPF: ")
+            print(f"Nota fiscal: Total da compra - R${self.total} | CPF - {cpf}")
+        else:
+            print(f"Nota fiscal: Total da compra - R${self.total}")
+
 
         self.catalogo = {"arroz": 10.8, "Feijao": 8.5, "macarrão": 5.8, "carne": 25.0}
         self.carrinho = {}
