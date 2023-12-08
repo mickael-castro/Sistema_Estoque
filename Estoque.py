@@ -45,7 +45,7 @@ class Estoque:
         self.produtos.append(carne)
 
         pano = Produto('Pano de prato "Me traga café que eu me expresso"', 50.0, None, 10)
-        self.produtos.append(carne)
+        self.produtos.append(pano)
 
     def escolha_funcao(self):
         while True:
@@ -117,8 +117,12 @@ class Estoque:
             print("Catálogo de produtos:")
             print("ID  | Quantidade | Nome do Produto             | Preço      | Validade ")
             for produto in self.produtos:
-                print(
-                    f"{produto.id:2} | {produto.quantidade:2} | {produto.nome:30} | R${produto.preco:.2f} | {produto.validade.strftime('%d/%m/%Y')}")
+                if produto.validade is not None:
+                    print(
+                        f"{produto.id:2} | {produto.quantidade:2} | {produto.nome:30} | R${produto.preco:.2f} | {produto.validade.strftime('%d/%m/%Y')}")
+                else:
+                    print(
+                        f"{produto.id:2} | {produto.quantidade:2} | {produto.nome:30} | R${produto.preco:.2f} | Sem validade")
             escolha = input("Digite o id do produto que deseja vender (ou `0` para encerrar): ")
 
             if escolha == "0":
@@ -187,26 +191,25 @@ class Estoque:
             self.escolha_funcao()
 
     def controle(self):
-        from datetime import date
+            agora = date.today()
+            for produto in self.produtos:
+                if produto.validade is not None:
+                    print(
+                        f"{produto.id:2} | {produto.quantidade:2} | {produto.nome:30} | R${produto.preco:.2f} | {produto.validade.strftime('%d/%m/%Y')}")
 
-        agora = date.today()
-        for produto in self.produtos:
-            if produto.validade < agora:
-                print(
-                    f"{produto.id:2} | {produto.quantidade:2} | {produto.nome:30} | R${produto.preco:.2f} | {produto.validade.strftime('%d/%m/%Y')}")
+            delete = input("Você deseja deletar o registro dos produtos inválidos? (s ou n)")
 
-        delete = input("Você deseja deletar o registro dos produtos inválidos? (s ou n)")
+            if delete == 's':
+                for produto in self.produtos:
+                    if produto.validade is not None and produto.validade < agora:
+                        del self.produtos[self.produtos.index(produto)]
 
-        if delete == 's':
-            print("deletou")
-        elif delete == 'n':
-            print("n deletou")
-        else:
-            print("Não há produtos fora da validade")
+            elif delete == 'n':
+                print("Não deletou nenhum produto inválido")
 
-        escolha = input('Você deseja deletar algum produto mesmo assim? (s ou n)')
-        if escolha.lower() == 's':
-            self.deletar()
+            escolha = input('Você deseja deletar algum outro produto mesmo assim? (s ou n)')
+            if escolha.lower() == 's':
+                self.deletar()
 
             # elif escolha.lower() == 'n':
             #     escolha2 = input("Você deseja escolher outra funcionaldiade? (s ou n)")
@@ -217,9 +220,32 @@ class Estoque:
             #         self.escolha_funcao()
 
     def deletar(self):
-        print('entrou')
-        pass
+        while True:
+            print("Catálogo de produtos:")
+            print("ID  | Quantidade | Nome do Produto             | Preço      | Validade ")
+            for produto in self.produtos:
+                print(
+                    f"{produto.id:2} | {produto.quantidade:2} | {produto.nome:30} | R${produto.preco:.2f} | {produto.validade.strftime('%d/%m/%Y')}")
+            escolha = int(input("Qual o id do produto que você deseja deletar? "))
 
+            produto_encontrado = False
+            for produto in self.produtos:
+                if produto.id == escolha:
+                    produto_encontrado = True
+                    confirmacao = input(f"Você realmente deseja deletar o produto '{produto.nome}'? (s ou n) ")
+                    if confirmacao.lower() == 's':
+                        # Deleta o produto
+                        del self.produtos[self.produtos.index(produto)]
+                        print("O produto foi deletado.")
+                    break
+
+            if not produto_encontrado:
+                print("Produto não encontrado. Tente novamente.")
+
+            escolha2 = input("Você deseja deletar mais algum produto? (s ou n) ")
+
+            if escolha2.lower() == 'n':
+                break
 
 
 if __name__ == "__main__":
