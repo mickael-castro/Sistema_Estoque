@@ -231,7 +231,18 @@ class Estoque:
         confirmacao = input("Você deseja confirmar a venda? (s ou n)")
         print()
 
-        if confirmacao == "s":
+        if confirmacao == "n":
+            # Cancele a venda e reverta as alterações no estoque
+            for produto, quantidade in self.carrinho:
+                produto.quantidade += quantidade
+
+            self.carrinho = []
+            self.total_ganhos = 0.0
+            self.total_custos = 0.0
+
+            print("A venda foi cancelada. O estoque foi restaurado.")
+            print()
+        elif confirmacao == "s":
             venda = Venda(self.carrinho, self.total_ganhos, self.total_custos)
             self.vendas.append(venda)
 
@@ -241,16 +252,10 @@ class Estoque:
 
             print("A venda foi registrada com sucesso")
             print()
-        elif confirmacao == "n":
-            ##REINICIAR ESTOQUE
-            self.carrinho = []
-            self.total_ganhos = 0.0
-            self.total_custos = 0.0
 
+        escolha2 = input("Você deseja escolher outra funcionalidade? (s ou n)")
 
-        escolha2 = input("Você deseja escolher outra funcionaldiade? (s ou n)")
-
-        if escolha2.lower() == "n": #escolha de continuação do código
+        if escolha2.lower() == "n":
             sys.exit()
         elif escolha2.lower() == "s":
             self.escolha_funcao()
