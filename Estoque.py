@@ -53,7 +53,6 @@ class Estoque:
         self.total_ganhos = 0.0
         self.total_custos = 0.0
         self.produtos = []
-        self.catalogo = []
         self.vendas = []
         self.perdas = []
 
@@ -79,6 +78,7 @@ class Estoque:
                 print(f'{funcionalidade.value} - {funcionalidade.name.capitalize()}')
 
             escolha = input("Digite o número correspondente à funcionalidade que você deseja usar ou '0' para Cancelar: ")
+            print()
 
             if escolha == "0":
                 break
