@@ -3,6 +3,7 @@ from enum import IntEnum, unique
 from datetime import date
 
 id = 0
+vendas_id = 0
 
 @unique
 class Funcionalidade(IntEnum):
@@ -11,12 +12,16 @@ class Funcionalidade(IntEnum):
     RELATORIO = 3
     CONTROLE = 4
 
+class Venda:
+    pass
+
 class Produto:
-    def __init__(self, nome, preco, validade=None, quantidade=int):
+    def __init__(self, nome, custo, preco, quantidade, validade=None):
         self.modificar_id()
         self.id = id
 
         self.nome = nome
+        self.custo = custo
         self.preco = preco
         self.validade = validade
         self.quantidade = quantidade
@@ -32,19 +37,19 @@ class Estoque:
         self.produtos = []
         self.catalogo = []
 
-        arroz = Produto('Saco de Arroz (1 Kg)', 10.8, date(2023, 12, 1), 10)
+        arroz = Produto('Saco de Arroz (1 Kg)', 5.4,  10.8, 10, date(2023, 12, 1))
         self.produtos.append(arroz)
 
-        feijao = Produto('Saco de Feijao (1 Kg)', 8.5, date(2023, 12, 12), 10)
+        feijao = Produto('Saco de Feijao (1 Kg)', 4.25, 8.5, 10, date(2023, 12, 12))
         self.produtos.append(feijao)
 
-        macarrao = Produto('Saco de Macarrão (500 g)', 5.8, date(2023, 12, 1), 10)
+        macarrao = Produto('Saco de Macarrão (500 g)', 2.90 , 5.8, 10, date(2023, 12, 12))
         self.produtos.append(macarrao)
 
-        carne = Produto('Peça de maminha (1 Kg)', 25.0, date(2023, 12, 10), 10)
+        carne = Produto('Peça de maminha (1 Kg)', 12.5, 25.0, 10, date(2023, 12, 10))
         self.produtos.append(carne)
 
-        pano = Produto('Pano de prato "Me traga café que eu me expresso"', 50.0, None, 10)
+        pano = Produto('Pano de prato', 25, 50.0, 10)
         self.produtos.append(pano)
 
     def escolha_funcao(self):
@@ -82,6 +87,13 @@ class Estoque:
             if novo_produto == "0":
                 break
 
+            novo_custo = input("Digite o custo deste produto: ")
+            try:
+                custo = float(novo_custo)
+            except ValueError:
+                print("Digite um valor válido para o custo.")
+                continue
+
             novo_preco = input("Digite o preço deste produto: ")
             try:
                 preco = float(novo_preco)
@@ -107,7 +119,7 @@ class Estoque:
                 print("Digite uma quantidade válida.")
                 continue
 
-            produto = Produto(novo_produto, preco, data_validade, quantidade)
+            produto = Produto(novo_produto, custo, preco, quantidade, data_validade)
             self.produtos.append(produto)
 
             print(f'Produto {produto.nome} cadastrado com sucesso.')
